@@ -1028,7 +1028,7 @@ static int print_skeys(HKEY root, WCHAR *p, const HKEY hkey)
     }
     reg_printfW(empty_line);
 
-    if(create_base_string(&display, root, p, max_value_sz)) {
+    if(create_base_string(&display, root, p, buf_sz)) {
         goto clean_skey;
     }
 
@@ -1105,7 +1105,11 @@ static int query_single_value(HKEY root, WCHAR* p, HKEY hkey,
     if (st) {
         goto clean_display;
     }
-    reg_printfW(empty_line);
+
+    if (nvalues > 0) {
+        reg_printfW(empty_line);
+    }
+	
     free(display.s);
     return 0;
 
