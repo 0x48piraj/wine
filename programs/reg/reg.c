@@ -1057,13 +1057,10 @@ static int print_skeys(HKEY root, WCHAR *p, const HKEY hkey)
         display.s[display.base_sz + skey_sz] = '\0';
         reg_printfW(ff, display.s);
     }
-    free(display.s);
     free(skey);
 
     return 0;
 
-clean_display:
-    free(display.s);
 clean_skey:
     free(skey);
 
