@@ -889,6 +889,11 @@ typedef struct {
     DWORD base_sz;
 } DisplayString;
 
+/*
+ * remain may be NULL (in which case it is assumed to be the empty
+ * string
+ */
+
 static int create_base_string(DisplayString *display,
         HKEY root, WCHAR *remain,
         DWORD max_value_size)
@@ -903,8 +908,10 @@ static int create_base_string(DisplayString *display,
         return -1;
     }
 
-    display->base_sz = strlenW(root_str) + 1 + strlenW(remain) + 1;
-
+    display->base_sz = strlenW(root_str) + 1;
+    if (remain != NULL) {
+        display->base_sz += strlenW(remain) + 1;
+    }
     ret_sz = display->base_sz + max_value_size + 1;
     ret = malloc(ret_sz * sizeof(*ret));
     if (ret == NULL) {
@@ -919,12 +926,13 @@ static int create_base_string(DisplayString *display,
     pret += strlenW(root_str);
 
     pret[0] = '\\';
-    pret += 1;
-    memcpy(pret, remain, strlenW(remain) * sizeof(*remain));
-    pret += strlenW(remain);
+    if (remain != NULL) {
+        pret += 1;
+        memcpy(pret, remain, strlenW(remain) * sizeof(*remain));
+        pret += strlenW(remain);
 
-    pret[0] = '\\';
-
+        pret[0] = '\\';
+    }
     return 0;
 }
 
