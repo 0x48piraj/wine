@@ -814,6 +814,75 @@ static int query_all(HKEY key, WCHAR *path, BOOL recurse)
     return 0;
 }
 
+static const WCHAR HKCR_WSTR[] = {'H', 'K', 'E', 'Y', '_', 'C', 'L', 'A', 'S', 'S', 'E', 'S', '_', 'R', 'O', 'O', 'T',  0};
+static DWORD HKCR_WSTR_SZ = sizeof(HKCR_WSTR);
+static const WCHAR HKLM_WSTR[] = {'H', 'K', 'E', 'Y', '_', 'L', 'O', 'C', 'A', 'L', '_', 'M', 'A', 'C', 'H', 'I', 'N', 'E', 0};
+static DWORD HKLM_WSTR_SZ = sizeof(HKLM_WSTR);
+static const WCHAR HKCU_WSTR[] = {'H', 'K', 'E', 'Y', '_', 'C', 'U', 'R', 'R', 'E', 'N', 'T', '_', 'U', 'S', 'E', 'R', 0};
+static DWORD HKCU_WSTR_SZ = sizeof(HKCU_WSTR);
+static const WCHAR HKU_WSTR[] = {'H', 'K', 'E', 'Y', '_', 'U', 'S', 'E', 'R', 'S', 0};
+static DWORD HKU_WSTR_SZ = sizeof(HKU_WSTR);
+
+/*
+ * Given hkey, return its string representation into buf, who is
+ * assumed to hold at least (buf_sz * sizeof(*buf)) bytes
+ *
+ * Return 0 if successful, other value otherwise
+ */
+static LONG hkey_to_wstring(HKEY hkey, WCHAR *buf, DWORD buf_sz)
+{
+    if (hkey == HKEY_LOCAL_MACHINE)
+    {
+        if (buf_sz >= HKLM_WSTR_SZ)
+        {
+            memcpy(buf, HKLM_WSTR, HKLM_WSTR_SZ);
+            return 0;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    else if (hkey == HKEY_CURRENT_USER)
+    {
+        if (buf_sz >= HKCU_WSTR_SZ)
+        {
+            memcpy(buf, HKCU_WSTR, HKCU_WSTR_SZ);
+            return 0;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    else if (hkey == HKEY_USERS)
+    {
+        if (buf_sz >= HKU_WSTR_SZ)
+        {
+            memcpy(buf, HKU_WSTR, HKU_WSTR_SZ);
+            return 0;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    else if (hkey == HKEY_CLASSES_ROOT)
+    {
+        if (buf_sz >= HKCR_WSTR_SZ)
+        {
+            memcpy(buf, HKCR_WSTR, HKCR_WSTR_SZ);
+            return 0;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    return -2;
+}
+
 static int reg_query(HKEY root, WCHAR *path, WCHAR *key_name, WCHAR *value_name,
                      BOOL value_empty, BOOL recurse)
 {
