@@ -883,6 +883,74 @@ static LONG hkey_to_wstring(HKEY hkey, WCHAR *buf, DWORD buf_sz)
     return -2;
 }
 
+typedef struct {
+    WCHAR *s;
+    DWORD sz;
+    DWORD base_sz;
+} DisplayString; 
+
+static int create_base_string(DisplayString *display,
+        HKEY root, WCHAR *remain,
+        WCHAR *value)
+{
+    WCHAR *ret, *pret;
+    WCHAR root_str[255];
+    LONG st;
+    DWORD ret_sz;
+
+    st = hkey_to_wstring(root, root_str, sizeof(root_str));
+    if (st) {
+        return -1;
+    }
+
+    display->base_sz = strlenW(root_str) + 1 + strlenW(remain) + 1;
+
+    ret_sz = display->base_sz + strlenW(value) + 1;
+    ret = malloc(ret_sz * sizeof(*ret));
+    if (ret == NULL) {
+        return -1;
+    }
+    display->s = ret;
+    display->sz = ret_sz;
+
+    pret = ret;
+    memcpy(ret, root_str,
+           sizeof(*ret) * strlenW(root_str));
+    pret += strlenW(root_str);
+
+    pret[0] = '\\';
+    pret += 1;
+    memcpy(pret, remain, strlenW(remain) * sizeof(*remain));
+    pret += strlenW(remain);
+
+    pret[0] = '\\';
+    pret += 1;
+    memcpy(pret, value, strlenW(value) * sizeof(*value));
+    pret += strlenW(value);
+    pret[0] = '\0';
+
+    return 0;
+}
+
+static int resize_display(DisplayString *display, WCHAR* skey)
+{
+    DWORD skey_sz = strlenW(skey);
+    WCHAR *pdisplay;
+
+    if(display->sz < (display->base_sz + skey_sz)) {
+        display->sz = display->base_sz + skey_sz;
+        display->s = realloc(display->s, sizeof(*display->s) * display->sz);
+        if(display->s == NULL) {
+            return -1;
+        }
+    }
+    pdisplay = display->s + display->base_sz;
+    memcpy(pdisplay, skey, skey_sz * sizeof(*skey));
+    pdisplay[skey_sz] = '\0';
+
+    return 0;
+}
+
 static int reg_query(HKEY root, WCHAR *path, WCHAR *key_name, WCHAR *value_name,
                      BOOL value_empty, BOOL recurse)
 {
