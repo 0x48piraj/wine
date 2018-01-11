@@ -22,6 +22,10 @@
 #include <wine/unicode.h>
 #include <wine/debug.h>
 #include "reg.h"
+#include "stdafx.h"
+#include "stdio.h"
+
+#define VERSION "1.3"
 
 WINE_DEFAULT_DEBUG_CHANNEL(reg);
 
@@ -1183,7 +1187,8 @@ static enum operations get_operation(const WCHAR *str, int *op_help)
     static const WCHAR import[] = {'i','m','p','o','r','t',0};
     static const WCHAR export[] = {'e','x','p','o','r','t',0};
     static const WCHAR query[] = {'q','u','e','r','y',0};
-
+    static const WCHAR query[] = {'s','a','v','e',0};
+    
     static const struct op_info op_array[] =
     {
         { add,     REG_ADD,     STRING_ADD_USAGE },
@@ -1191,6 +1196,7 @@ static enum operations get_operation(const WCHAR *str, int *op_help)
         { import,  REG_IMPORT,  STRING_IMPORT_USAGE },
         { export,  REG_EXPORT,  STRING_EXPORT_USAGE },
         { query,   REG_QUERY,   STRING_QUERY_USAGE },
+        { save,   REG_QUERY,   STRING_SAVE_USAGE },
         { NULL,    -1,          0 }
     };
 
